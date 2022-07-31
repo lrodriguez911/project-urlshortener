@@ -2,9 +2,15 @@ require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
 const app = express();
-
+const bodyParser = require('body-parser')
+const mySecret = proces.env.MONGO_URI;
+const mongoose = require('mongoose')
 // Basic Configuration
+mongoose.connect(mySecret, { useNewUrlParser: true, useUnifiedTopology: true }))
+
 const port = process.env.PORT || 3000;
+
+app.use(bodyParser.urlencoded({extended: false}))
 
 app.use(cors());
 
