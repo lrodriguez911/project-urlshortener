@@ -35,7 +35,7 @@ app.get('/api/hello', function(req, res) {
   res.json({ greeting: 'hello API' });
 });
 
-app.post('/api/shorturl/', async (req, res, next) => {
+/* app.post('/api/shorturl/', async (req, res, next) => {
 const urlForm = req.body.url;
 const url = new Url({url : urlForm, shortUrl: Math.floor(Math.random() * 100)})
 
@@ -48,7 +48,7 @@ try {
 console.log(error)
 } 
 next()
-})
+}) */
 app.listen(port, function() {
   console.log(`Listening on port ${port}`);
 });
