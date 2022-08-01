@@ -35,20 +35,23 @@ app.get('/api/hello', function(req, res) {
   res.json({ greeting: 'hello API' });
 });
 
-/* app.post('/api/shorturl/', async (req, res, next) => {
-const urlForm = req.body.url;
-const url = new Url({url : urlForm, shortUrl: Math.floor(Math.random() * 100)})
+app.post('/api/shorturl', async (req, res) => {
+
+let urlForm = req.body.url;
+let numRamdon = Math.floor(Math.random() * 100);
+let url = new Url({url : urlForm, shortUrl: numRamdon })
 
 try {
-  url.save((err, data) => {
+ await url.save((err, data) => {
     if(err) return console.log(err);
-    res.json({url: urlForm, shortUrl})
+
+    res.json({url: `${urlForm}`, shortUrl: `${numRamdon}`})
   })
 } catch (error) {
 console.log(error)
 } 
-next()
-}) */
+
+})
 app.listen(port, function() {
   console.log(`Listening on port ${port}`);
 });
