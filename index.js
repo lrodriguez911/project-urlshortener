@@ -5,6 +5,7 @@ const app = express();
 const bodyParser = require('body-parser')
 const mySecret = process.env.MONGO_URI;
 const mongoose = require('mongoose')
+const dns = require('dns')
 
 
 // Basic Configuration
@@ -39,7 +40,7 @@ app.post('/api/shorturl', async (req, res) => {
   let urlForm  = req.body.url;
   let numRandom = Math.floor(Math.random() * 100);
   let url = new Url({url : urlForm, shortUrl : numRandom})
-  
+  console.log(dns.lookup(urlForm, cb))
   try {
     await url.save((err, data)=> {
     if(err) return console.log(err);
@@ -49,8 +50,6 @@ app.post('/api/shorturl', async (req, res) => {
   } catch (error) {
     console.log(error)
   }
-  
-  
 })
 
 app.listen(port, function() {
