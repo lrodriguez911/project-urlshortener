@@ -5,6 +5,7 @@ const app = express();
 const bodyParser = require('body-parser');
 const mongoose = require('mongoose')
 const mySecret = process.env.MONGO_URI
+const dns = require('node:dns')
 
 // Basic Configuration
 mongoose.connect(mySecret, { useNewUrlParser: true, useUnifiedTopology: true })
@@ -40,7 +41,10 @@ app.post('/api/shorturl', async (req, res) => {
 let urlForm = req.body.url;
 let numRamdon = Math.floor(Math.random() * 100);
 let url = new Url({url : urlForm, shortUrl: numRamdon })
-
+dns.lookup(urlForm, (err, address, family) =>{
+if(err) return console.log(err);
+console.log('address: %j family: IPv%s', address, family)}
+)
 try {
  await url.save((err, data) => {
     if(err) return console.log(err);
