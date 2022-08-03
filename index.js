@@ -40,7 +40,10 @@ app.post('/api/shorturl', async (req, res) => {
   let urlForm  = req.body.url;
   let numRandom = Math.floor(Math.random() * 100);
   let url = new Url({url : urlForm, shortUrl : numRandom})
-  console.log(dns.lookup(urlForm, cb))
+  console.log(dns.lookup(urlForm, (err, done) => {
+    if(err) return console.log(err);
+    console.log(done)
+  }))
   try {
     await url.save((err, data)=> {
     if(err) return console.log(err);
