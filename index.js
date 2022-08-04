@@ -8,10 +8,13 @@ const mySecret = process.env.MONGO_URI
 const dns = require('node:dns')
 
 // Basic Configuration
+
+//connecting to db
 mongoose.connect(mySecret, { useNewUrlParser: true, useUnifiedTopology: true })
 
 const port = process.env.PORT || 3000;
 
+//creqte schema and model in mongoose
 const { Schema } = mongoose;
 
 const urlSchema = new Schema({url: {type : String, required: true},
@@ -36,26 +39,31 @@ app.get('/api/hello', function(req, res) {
   res.json({ greeting: 'hello API' });
 });
 
-app.post('/api/shorturl', async (req, res) => {
+app.post('/api/shorturl', (req, res) => {
 
 let urlForm = req.body.url;
 let numRamdon = Math.floor(Math.random() * 100);
-let url = new Url({url : urlForm, shortUrl: numRamdon })
+let url = new Url({url : urlForm})
+
+url.find({url: urlForm}, (err,data) => {
+  if(err) return console.log(err);
+  console.log(data)
+}) 
+
 dns.lookup(urlForm, (err, address, family) =>{
 if(err) return console.log(err);
 console.log('address: %j family: IPv%s', address, family)}
 )
-try {
- await url.save((err, data) => {
+
+
+
+ url.save((err, data) => {
     if(err) return console.log(err);
-
-    res.json({url: `${urlForm}`, shortUrl: `${numRamdon}`})
+  console.log(data.url, data.id)
+    res.json({url: data.url, shortUrl: data.id})
   })
-} catch (error) {
-console.log(error)
-} 
-
 })
+
 app.listen(port, function() {
   console.log(`Listening on port ${port}`);
 });
