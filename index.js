@@ -6,6 +6,7 @@ const bodyParser = require('body-parser')
 const mySecret = process.env.MONGO_URI;
 const mongoose = require('mongoose')
 const dns = require('dns')
+const urlPars = require('url')
 
 
 // Basic Configuration
@@ -13,8 +14,8 @@ mongoose.connect(mySecret, { useNewUrlParser: true, useUnifiedTopology: true })
 
 const { Schema } = mongoose;
 const urlSchema = new Schema({
-  url:{type: String},
-  shortUrl: Number
+  original_url :{type: String},
+  short_url : Number
 })
 const Url = mongoose.model('Url', urlSchema)
 const port = process.env.PORT || 3000;
@@ -31,30 +32,40 @@ app.get('/', function(req, res) {
 
 // Your first API endpoint
 app.get('/api/hello', function(req, res) {
-  //await Character.create({ name: 'Jean-Luc Picard' })
   res.json({ greeting: 'hello API' });
 });
 
-app.post('/api/shorturl', async (req, res) => {
-  
+app.post('/api/shorturl', (req, res) => {
   let urlForm  = req.body.url;
-  let numRandom = Math.floor(Math.random() * 100);
-  let url = new Url({url : urlForm, shortUrl : numRandom})
-  console.log(dns.lookup(urlForm, (err, done) => {
-    if(err) return console.log(err);
-    console.log(done)
-  }))
-  try {
-    await url.save((err, data)=> {
-    if(err) return console.log(err);
+  
+  dns.lookup(urlPars.parse(urlForm).hostname , 
+    (err, address) => {
+    if(!address) return res.json({error : 'invalid url'});
       
-    res.json({url : `${urlForm}`, shortUrl: `${numRandom}`})
+    const url = new Url({original_url : urlForm})
+      
+    url.save((err, data)=> {
+    if(err) return console.log(err);
+      console.log(data.original_url, data.id)
+    res.json({original_url : data.original_url, short_url: data.id})
+      
   })
-  } catch (error) {
-    console.log(error)
-  }
-})
+  })
 
+})
+app.get('/api/shorturl/:id', (req,res) => {
+  
+  const urlId = req.params.id;
+  
+  Url.findById(urlId, (err, data) => {
+    
+    if(!urlId){
+      res.send({ error: 'invalid url' })
+    }
+    res.redirect(data.original_url)
+  })
+  
+})
 app.listen(port, function() {
   console.log(`Listening on port ${port}`);
 });
