@@ -53,7 +53,7 @@ app.post('/api/shorturl', (req, res) => {
   })
 
 })
-app.get('/api/shorturl/:id', (req,res) => {
+app.get('/api/shorturl/:id', (req,res, next) => {
   
   const urlId = req.params.id;
   
@@ -64,7 +64,7 @@ app.get('/api/shorturl/:id', (req,res) => {
     }
     res.redirect(data.original_url)
   })
-  
+  next()
 })
 app.listen(port, function() {
   console.log(`Listening on port ${port}`);
