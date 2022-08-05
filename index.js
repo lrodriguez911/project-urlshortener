@@ -4,8 +4,9 @@ const cors = require('cors');
 const app = express();
 const bodyParser = require('body-parser');
 const mongoose = require('mongoose')
-const mySecret = process.env.MONGO_URI
-const dns = require('node:dns')
+const mySecret = process.env.MONGO_URI;
+const dns = require('dns')
+const urlParse = require('url')
 
 // Basic Configuration
 
@@ -17,8 +18,8 @@ const port = process.env.PORT || 3000;
 //creqte schema and model in mongoose
 const { Schema } = mongoose;
 
-const urlSchema = new Schema({url: {type : String, required: true},
-shortUrl : Number })
+const urlSchema = new Schema({original_url: {type : String, required: true},
+short_url : Number })
 
 const Url = new mongoose.model('Url', urlSchema);
 
@@ -42,26 +43,34 @@ app.get('/api/hello', function(req, res) {
 app.post('/api/shorturl', (req, res) => {
 
 let urlForm = req.body.url;
-let numRamdon = Math.floor(Math.random() * 100);
-let url = new Url({url : urlForm})
+//let numRamdon = Math.floor(Math.random() * 100);
 
-url.find({url: urlForm}, (err,data) => {
-  if(err) return console.log(err);
-  console.log(data)
-}) 
+dns.lookup( urlParse.parse(urlForm).hostname, (err, address) =>{
 
-dns.lookup(urlForm, (err, address, family) =>{
+if(!address) return res.json({ error: 'invalid url' });
+
+let url = new Url({original_url : urlForm})
+
+url.save((err, data) => {
 if(err) return console.log(err);
-console.log('address: %j family: IPv%s', address, family)}
-)
 
+console.log(data.original_url, data.id)
+  res.json({url: data.original_url, short_url: data.id})
+})
+})
+})
 
+app.get('/api/shorturl/:id', (req, res, next) => {
+  let urlId = req.params.id;
 
- url.save((err, data) => {
+    Url.findById(urlId, (err, data) => {
     if(err) return console.log(err);
-  console.log(data.url, data.id)
-    res.json({url: data.url, shortUrl: data.id})
-  })
+    if(!data){
+      return res.json({ error: 'invalid url' })
+    }
+    res.redirect(data.original_url)
+  }) 
+  next();
 })
 
 app.listen(port, function() {
